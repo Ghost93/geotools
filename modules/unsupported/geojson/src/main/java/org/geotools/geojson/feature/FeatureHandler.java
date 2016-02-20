@@ -16,10 +16,8 @@
  */
 package org.geotools.geojson.feature;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geojson.DelegatingHandler;
@@ -31,8 +29,9 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -41,6 +40,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
  */
 public class FeatureHandler extends DelegatingHandler<SimpleFeature> {
 
+    private GeometryFactory geometryFactory;
     private int fid = 0;
 
     private String separator = "-";
@@ -70,6 +70,11 @@ public class FeatureHandler extends DelegatingHandler<SimpleFeature> {
 
     public FeatureHandler() {
         this(null, new DefaultAttributeIO());
+    }
+
+    public FeatureHandler(GeometryFactory geometryFactory){
+        this();
+        this.geometryFactory = geometryFactory;
     }
 
     public FeatureHandler(SimpleFeatureBuilder builder, AttributeIO attio) {
@@ -133,7 +138,7 @@ public class FeatureHandler extends DelegatingHandler<SimpleFeature> {
     @Override
     public boolean endObject() throws ParseException, IOException {
         if (delegate instanceof IContentHandler) {
-            ((IContentHandler) delegate).endObject();
+            delegate.endObject();
 
             if (delegate instanceof GeometryHandler) {
                 Geometry g = ((IContentHandler<Geometry>) delegate).getValue();
